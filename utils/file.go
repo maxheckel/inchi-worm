@@ -40,3 +40,18 @@ func WriteOutput(result []model.Inchi, name string) error {
 	_, err = out.WriteString(content)
 	return err
 }
+
+func WriteLine(inchi model.Inchi, name string) error {
+
+	f, err := os.OpenFile(name, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+	line := fmt.Sprintf("%s	%s\n", inchi.Key, inchi.Value)
+	if _, err = f.WriteString(line); err != nil {
+		return err
+	}
+	return nil
+}

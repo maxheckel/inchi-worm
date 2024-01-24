@@ -24,35 +24,42 @@ func main() {
 		panic(err)
 	}
 
-	res := []model.Inchi{}
 	resChan := make(chan model.Inchi)
 	errChan := make(chan error)
 	wg := sync.WaitGroup{}
 	fmt.Printf("Starting requests for %d keys", len(lines))
 
-	go func() {
-		wg.Wait()
-		close(resChan)
-		close(errChan)
-	}()
 	for index, line := range lines {
 		wg.Add(1)
 		go getResultAsync(line, resChan, errChan, &wg)
 
 		if index%5 == 0 {
 			fmt.Print(".")
+
+			go func() {
+				wg.Wait()
+				close(resChan)
+				close(errChan)
+
+			}()
+
+			for result := range resChan {
+				err = utils.WriteLine(result, "inchi_worm_output")
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
+			for err := range errChan {
+				fmt.Println(err)
+			}
+
+			resChan = make(chan model.Inchi)
+			errChan = make(chan error)
 			time.Sleep(1 * time.Second)
+
 		}
 	}
 
-	for result := range resChan {
-		res = append(res, result)
-	}
-	for err := range errChan {
-		fmt.Println(err)
-	}
-
-	utils.WriteOutput(res, "inchi_worm_output")
 }
 
 func getResultAsync(key string, resChan chan model.Inchi, errChan chan error, wg *sync.WaitGroup) {
