@@ -1,4 +1,4 @@
-#🐛 Inchi Worm 🐛
+# 🐛 Inchi Worm 🐛
 A utility for crawling Inchi from Inchi Keys
 
 ## How To Use
